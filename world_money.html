@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Money - Prototype</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+        .panel {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .log {
+            height: 150px;
+            overflow-y: auto;
+            background-color: #111;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌍 World Money - Prototype (RDC)</h1>
+
+    <!-- Tableau de bord -->
+    <div class="dashboard">
+        <div class="stat">
+            <div class="stat-value" id="ui-tresorerie">1000 Mds FC</div>
+            <div class="stat-label">Trésorerie de l'État</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="ui-fortune">50 Mds FC</div>
+            <div class="stat-label">Votre Fortune Privée</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="ui-approbation">50%</div>
+            <div class="stat-label">Approbation Populaire</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="ui-tour">Tour 1</div>
+            <div class="stat-label">Mois</div>
+        </div>
+    </div>
+
+    <!-- Onglet Industrie -->
+    <div class="panel">
+        <h2>🏭 Industrie & Économie</h2>
+        <p>Construisez des usines pour générer des revenus à chaque tour.</p>
+        
+        <div style="margin-bottom: 15px;">
+            <h3>🏗️ Cimenterie (Usine d'État)</h3>
+            <p>Coût : 150 Mds FC | Revenu : + 20 Mds FC / tour</p>
+            <button class="btn" id="btn-construire-cimenterie" onclick="construireCimenterie()">Construire Cimenterie (État)</button>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <h3>💼 Usine Textile (Entreprise Privée)</h3>
+            <p>Coût : 50 Mds FC (Fortune privée) | Revenu Privé : + 10 Mds FC / tour</p>
+            <button class="btn" id="btn-construire-textile" onclick="construireTextile()">Construire Usine Textile (Privé)</button>
+        </div>
+    </div>
+
+    <!-- Actions du tour -->
+    <div class="panel">
+        <h2>⏳ Actions</h2>
+        <button class="btn btn-danger" id="btn-tour-suivant" onclick="tourSuivant()">Passer au Tour Suivant (Mois Suivant)</button>
+    </div>
+
+    <!-- Journal des événements -->
+    <div class="panel">
+        <h2>📰 Journal des Événements</h2>
+        <div class="log" id="journal">
+            Bienvenue Président. Le pays est à vous.
+        </div>
+    </div>
+
+    <script>
+        // --- VARIABLES DU JEU ---
+        let etat = {
+            tresorerie: 1000, // En Milliards de FC
+            fortunePrivee: 50,
+            approbation: 50,
+            tour: 1,
+            cimenteries: 0,
+            usinesTextiles: 0
+        };
+
+        // --- FONCTIONS DU JEU ---
+
+        function ajouterLog(message) {
+            const journal = document.getElementById('journal');
+            journal.innerHTML = `<div>[Tour ${etat.tour}] ${message}</div>` + journal.innerHTML;
+        }
+
+        function mettreAJourAffichage() {
+            document.getElementById('ui-tresorerie').innerText = etat.tresorerie.toFixed(1) + " Mds FC";
+            document.getElementById('ui-fortune').innerText = etat.fortunePrivee.toFixed(1) + " Mds FC";
+            document.getElementById('ui-approbation').innerText = etat.approbation + "%";
+            document.getElementById('ui-tour').innerText = "Tour " + etat.tour;
+
+            // Vérifier si le joueur a assez d'argent pour construire
+            document.getElementById('btn-construire-cimenterie').disabled = etat.tresorerie < 150;
+            document.getElementById('btn-construire-textile').disabled = etat.fortunePrivee < 50;
+        }
+
+        function construireCimenterie() {
+            if (etat.tresorerie >= 150) {
+                etat.tresorerie -= 150;
+                etat.cimenteries++;
+                ajouterLog("🏗️ Une nouvelle Cimenterie d'État a été construite (-150 Mds FC).");
+                mettreAJourAffichage();
+            }
+        }
+
+        function construireTextile() {
+            if (etat.fortunePrivee >= 50) {
+                etat.fortunePrivee -= 50;
+                etat.usinesTextiles++;
+                ajouterLog("💼 Vous avez construit une Usine Textile privée (-50 Mds FC de votre fortune).");
+                
+                // Le peuple n'aime pas que le président s'enrichisse (Impact sur l'approbation)
+                etat.approbation -= 2; 
+                if(etat.approbation < 0) etat.approbation = 0;
+                
+                mettreAJourAffichage();
+            }
+        }
+
+        function tourSuivant() {
+            etat.tour++;
+
+            // 1. Calcul des revenus de l'État
+            let revenuEtat = etat.cimenteries * 20;
+            etat.tresorerie += revenuEtat;
+
+            // 2. Calcul des revenus privés du Président
+            let revenuPrive = etat.usinesTextiles * 10;
+            etat.fortunePrivee += revenuPrive;
+
+            // 3. Salaire présidentiel
+            etat.fortunePrivee += 0.05; // 50 millions FC
+
+            ajouterLog(`📈 Fin du tour. L'État a gagné ${revenuEtat} Mds FC. Vous avez gagné ${revenuPrive} Mds FC.`);
+
+            // 4. Événement aléatoire simple
+            let chance = Math.random();
+            if (chance < 0.2) {
+                etat.approbation -= 5;
+                ajouterLog("⚠️ ÉVÉNEMENT : Inflation ! Le prix du carburant monte. L'approbation baisse de 5%.");
+            } else if (chance > 0.8) {
+                etat.approbation += 3;
+                ajouterLog("✅ ÉVÉNEMENT : Match de football gagné ! Le peuple est content. L'approbation monte de 3%.");
+            }
+
+            // Limiter l'approbation entre 0 et 100
+            if (etat.approbation > 100) etat.approbation = 100;
+            if (etat.approbation < 0) etat.approbation = 0;
+
+            // Si l'approbation est à 0, c'est la fin
+            if (etat.approbation === 0) {
+                alert("GAME OVER : Le peuple s'est révolté et vous a renversé !");
+                location.reload(); // Recommencer
+            }
+
+            mettreAJourAffichage();
+        }
+
+        // Initialiser l'affichage au chargement
+        mettreAJourAffichage();
+    </script>
+</body>
+</html>
